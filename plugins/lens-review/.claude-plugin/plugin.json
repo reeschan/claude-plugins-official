@@ -1,0 +1,11 @@
+{
+  "name": "lens-review",
+  "description": "Lens-based code review that verifies every finding before reporting it, in Japanese. Derived from Anthropic's code-review plugin.",
+  "version": "0.1.0",
+  "author": {
+    "name": "reeschan"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/reeschan/claude-plugins-official",
+  "homepage": "https://github.com/reeschan/claude-plugins-official/tree/reeschan/plugins/lens-review"
+}
