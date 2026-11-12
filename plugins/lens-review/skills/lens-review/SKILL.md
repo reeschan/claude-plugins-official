@@ -26,7 +26,7 @@ argument-hint: "[PR | <base>..<head> | <base>] [paths...] [--comment] [--rules <
 
 1. 始めの `git status --porcelain --ignored` を控える。Python を実行するときは `PYTHONDONTWRITEBYTECODE=1` を付ける (`__pycache__` は無視されたファイルなので、`--ignored` が無いと見えない)。対象の diff とファイルの一覧を取る。変更が無ければ「変更なし」と出して終わる。
    - 未追跡のファイルは `git status --porcelain` で並べて全文を読む。索引は変えない (`git add` しない)。
-   - PR の head が手元に無ければ `git fetch origin pull/<n>/head` で取り、`git show <sha>:<path>` で読む。このときチェックアウトは変えず、裏取りは読むだけにする。
+   - PR の head が手元に無ければ、PR のリポジトリ (`gh pr view <n> --json url` の owner/repo) を指すリモートから `git fetch <そのリモート> pull/<n>/head` で取り (fork の clone で上流の PR なら `upstream`。合うリモートが無ければ `git fetch https://github.com/<owner>/<repo>.git pull/<n>/head`)、`git show <sha>:<path>` で読む。このときチェックアウトは変えず、裏取りは読むだけにする。
 2. 規約を集める: ルートと、変更されたファイルのフォルダとその親の `CLAUDE.md`・`AGENTS.md`・`CONTRIBUTING.md`、`--rules`、`--spec`。`--spec` が無ければ、変更に含まれる仕様書と決定の記録 (`docs/specs`・ADR など) と、それらが前提として名指しする仕様書を仕様として読む。
 3. 変更を 3〜5 行に要約し、`## 観点の選び方` で観点を選ぶ。
 4. 候補を出す (`## 並列と順次`)。
@@ -87,7 +87,7 @@ argument-hint: "[PR | <base>..<head> | <base>] [paths...] [--comment] [--rules <
 ## 出さないもの
 
 - 変更の前からある問題。
-- リンター・型検査・コンパイラが拾うもの (それらは実行しない)。
+- リンター・型検査・コンパイラが拾うもの (それらは実行しない)。ただし、構文・import・未定義の参照の誤りで変更後のコードが動かないものは出す。
 - 好みの書き方、言い回し、誤字、命名。
 - 規約に無い一般論 (テストが少ない、もっと堅くできる)。
 - コードで明示的に黙らせてある規約違反 (lint の無視コメントなど)。

@@ -86,7 +86,10 @@ Agent ツールが使えないところ (サブエージェントの中など) �
   git checkout main && git merge --ff-only upstream/main && git push origin main
   git log e37d307b..upstream/main -- plugins/code-review plugins/pr-review-toolkit
   git checkout reeschan && git merge main
-  git checkout --ours .claude-plugin/marketplace.json   # 衝突したら自分の側を残す
+  # 衝突したら、自分の側を残してマージを終える
+  git checkout --ours .claude-plugin/marketplace.json
+  git add .claude-plugin/marketplace.json
+  git merge --continue
   ```
 
   `plugins/code-review` か `pr-review-toolkit` の手順・誤検知の一覧に変更があれば、`lens-review` に手で写し、上のコミットを更新します。

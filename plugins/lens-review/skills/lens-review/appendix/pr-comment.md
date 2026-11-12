@@ -8,7 +8,9 @@
 
 - 対象が PR ではない (手元の diff)。
 - PR が閉じている (`gh pr view <n> --json state`)。
-- このスキルのコメントがもうある (`gh pr view <n> --comments` に「## lens-review」で始まるコメントか、同じ見出しのインラインコメントがある)。
+- 「## lens-review」で始まるまとめのコメントがもうある (`gh pr view <n> --comments`)。
+
+まとめのコメントが無くても、前の投稿が途中で止まってインラインコメントだけ残っていることがある。投稿の前に `gh api repos/<owner>/<repo>/pulls/<n>/comments --paginate` で既存のインラインコメントを並べ、同じ印 (下の「1 件の本文の順」) を持つ指摘は出さない。出すものが残っていなければ、まとめのコメントだけを出す。
 
 ## 投稿の前に
 
@@ -23,8 +25,8 @@
   gh api repos/<owner>/<repo>/pulls/<n>/reviews --method POST --input <一時フォルダ>/review.json
   ```
 
-  `review.json` の形: `{"commit_id": "<head の完全な SHA>", "event": "COMMENT", "body": "<本文>", "comments": [{"path": "<file>", "line": <行>, "side": "RIGHT", "body": "<指摘>"}]}`。複数行なら `start_line` も付ける。行が diff に無いと 422 になるので、その指摘は本文に回す。
-- 1 件の本文の順: 「**[重大度・手間] 見出し**」→ 理由 → 直し方 → 裏取り。日本語で書く。
+  `review.json` の形: `{"commit_id": "<head の完全な SHA>", "event": "COMMENT", "body": "<本文>", "comments": [{"path": "<file>", "line": <行>, "side": "RIGHT", "body": "<指摘>"}]}`。複数行なら `start_line` と `start_side` も付ける。追加・変更された行は `side: "RIGHT"` と変更後の行番号、削除された行は `side: "LEFT"` と基準の版の行番号にする (MCP の道具でも同じ)。行が diff に無いと 422 になるので、その指摘は本文に回す。
+- 1 件の本文の順: 印の行 `<!-- lens-review: <file>:<行> <見出し> -->` → 「**[重大度・手間] 見出し**」→ 理由 → 直し方 → 裏取り。日本語で書く。印は、やり直したときに投稿済みの指摘を見分けるために使う。
 - suggestion (````suggestion` のブロック) は、5 行以内で、それを入れるだけで直り切るときだけ付ける。続きの作業が要るなら文で書く。
 
 ## diff の外の行と、まとめのコメント
