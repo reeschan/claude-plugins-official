@@ -200,7 +200,7 @@ Atelier の最終レビューは、レビュー担当のサブエージェント
 ### PR へのコメント (`--comment`)
 
 - 行に付けられる指摘は、インラインコメントにする。本文は「**[札] 見出し**」「理由」「直し方 (条件を満たせば suggestion)」「裏取り」の順。
-- 投稿は、`gh api` で 1 つのレビュー (コメントだけ、承認も却下もしない) にまとめて出す。通知が 1 回で済む。`mcp__github_inline_comment__create_inline_comment` は、`gh` が使えない (コマンドが無い、認証されていない) ときだけ使う。`gh api` の投稿が失敗したとき (422 を含む) は、切り替えずに失敗として終える。
+- 投稿は、`gh api` で 1 つのレビュー (コメントだけ、承認も却下もしない) にまとめて出す。通知が 1 回で済む。`gh` が使えないときは投稿しない (閉じているかの確認・投稿済みの検索・head の確認のどれにも `gh` が要る)。MCP のインラインコメントの道具は使わない。`gh api` の投稿が失敗したとき (422 を含む) は、失敗として終える。
 - レビューした head の SHA は、対象を取ったときに控えた値を使う。投稿の前に今の head と比べ、違えば (レビュー中に push があった) 投稿せずに終える。指摘の行番号が別の head に付かないようにするため。
 - 書き換え (0.3.0): インラインコメントは、印 `<!-- lens-review: <file>:<行> <見出し> -->` が同じ指摘がもうあれば付け直さない。まとめのコメント (1 行目が `## lens-review`) は、あれば `PATCH` で書き換え、無ければ足す。どちらも、書き手が投稿者 (`gh api user`、取れなければ `github-actions[bot]`) のものだけを見る。
 - まとめのコメントには、重大度ごとの件数、出さなかった件数 (下限より軽いもの)、確認した観点、head の完全な SHA、今回と前に出した指摘の一覧を書く。diff の外の行に当たる指摘は、ここに `file:line` とリンクで並べる。
@@ -225,6 +225,7 @@ PR に自動でレビューを付ける bot (`reeschan/lens-review-bot`、`scrip
 - **`--comment` を書き換えにする。** 0.2.0 は、自分のコメントがもうあると投稿をやめていた。0.3.0 は、新しい指摘だけをレビューに足し、まとめのコメントは 1 つのまま `PATCH` で中身を新しくする。書き換えの対象は投稿者が書いたものだけ。人が書いた `## lens-review` や印の入ったコメントで、指摘が消えたりまとめが乗っ取られたりしないようにするため。
 - **bot からの呼び出しの形。** bot は `/lens-review:lens-review <PR 番号> --comment --min-severity <…>[ --post-rule-violations][ --rules <パス>]...[ --spec <パス>]` で呼ぶ。2 行目に「次のパス (glob) に当たるファイルは対象から除く: …」が付くことがある (bot の設定の exclude)。lens-review は、その行のパス (glob) に当たるファイルを差分から除いてレビューする。
 - 手順の細部は `appendix/pr-comment.md` が基準。ここと食い違えば付録が正しい。
+- **同じ PR への同時の呼び出しは、呼ぶ側で 1 つずつにする。** スキルは投稿の前に head を確かめるが、確かめてから投稿するまでの間は排他にならない。同時に 2 つ走ると、まとめが 2 つできたり、古い回が新しい回のまとめを上書きしたりする余地が残る。bot は PR ごとの `concurrency` (`cancel-in-progress`) で古い回を止めて防ぐ。手元から同時に呼ぶことは想定しない (既知の制限)。
 
 ## 追加の規約 (review-guideline) の取り込み
 
@@ -313,7 +314,7 @@ PR に自動でレビューを付ける bot (`reeschan/lens-review-bot`、`scrip
 - 深さ 2 のレビュー担当が Agent ツールで子を起こせること (`appendix/review.md` の記述からの読み取り。起こせなくても、道具の有無で順次に切り替わるので動く)。
 - `/plugin marketplace add <owner>/<repo>` が既定ブランチを読むこと (違えば、`reeschan` の内容を `main` に置き、upstream の写しを別の枝にする)。
 - `claude-plugins-official` という marketplace 名を第三者が使えるかどうか (改名するので、どちらでも影響しない)。
-- `gh api` で 1 つのレビュー (`pulls/<n>/reviews`) を投稿すると、インラインコメントが diff の行に正しく付くこと (付かなければ、1 つのまとめコメントにリンクを並べる upstream README の形にする)。MCP のインラインコメントの道具は、`gh` が使えないときの代わり (指摘 1 件ごとに出すので通知は件数だけ増える)。
+- `gh api` で 1 つのレビュー (`pulls/<n>/reviews`) を投稿すると、インラインコメントが diff の行に正しく付くこと (付かなければ、1 つのまとめコメントにリンクを並べる upstream README の形にする)。
 
 ## 未決事項 (持ち主に聞くこと)
 
@@ -335,7 +336,7 @@ PR に自動でレビューを付ける bot (`reeschan/lens-review-bot`、`scrip
 | F2 | fork | `SKILL.md` (流れ・対象・並列と順次・出力) と `prompts/reviewer.md`・`prompts/validator.md` | 手元の diff に対して、並列と `--inline` の両方で、決めた書式の日本語の結果が出る。裏取りの後で `git status` が変わらない | F1 |
 | F3 | fork | 観点のチェックリスト 6 本 (`lenses/*.md`) とファイル種別での選び方 | `.md` だけの変更で「文書と手順」と「規約と仕様」だけが動く。`.py` の変更で 4 観点が動く | F2 |
 | F4 | fork | 評価を回し、結果を `evals/` に記録。届かない観点のチェックリストを直す | 「評価」の合格の目安に届く。届かなければ数字と理由を持ち主に報告 | F3、未決 6 |
-| F5 | fork | `--comment` (`appendix/pr-comment.md`)。MCP の道具があるときと `gh api` のとき | 試験用の PR に、インラインコメントと「指摘なし」のコメントが付く | F2 |
+| F5 | fork | `--comment` (`appendix/pr-comment.md`)。`gh api` のとき | 試験用の PR に、インラインコメントと「指摘なし」のコメントが付く | F2 |
 | A1 | atelier | `prompts/final-review.md` と `appendix/review.md` の書き換え (`Target:`・`Rules:`・行を写す決まり・詳細ファイル・深さの注意) | 外部部品として手で登録した `lens-review` で最終レビューが走り、`final.review.md` が今の書式で書かれ、前後で status が変わらない | F3 |
 | A2 | atelier | `examples/workflows/recommended.json` と README (英・日) の差し替え、テストの期待値、`test_component.py` の追加 1 件、CHANGELOG | `component.py example check recommended` が `lens-review` の install 行を出す。テストが全部通る | A1、未決 3 |
 | O1 | 手元 | `review-flow` の版を上げる (呼び先と `--rules`)。Atelier のマージ後に `skill-versioning` で版を上げ、`setup --recommended` をやり直す | 「レビューして」で `lens-review` が動き、自分のリポジトリでは規約が渡る | F4、A2、未決 4 |
