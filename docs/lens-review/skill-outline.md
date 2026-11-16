@@ -18,7 +18,9 @@ plugins/lens-review/
     │   ├── input-failure.md        入力と失敗
     │   ├── state-external.md       状態と外部
     │   ├── docs-procedure.md       文書と手順
-    │   └── tests.md                テスト
+    │   ├── tests.md                テスト
+    │   ├── gate-evidence.md        合否と承認 (0.2.0)
+    │   └── text-evidence.md        文字列による判定 (0.2.0)
     ├── prompts/
     │   ├── reviewer.md             観点の担当に渡す
     │   └── validator.md            検証の担当に渡す
@@ -73,6 +75,8 @@ argument-hint: "[PR | <base>..<head> | <base>] [paths...] [--comment] [--rules <
 | 状態と外部 | lenses/state-external.md | コードの変更がある |
 | 文書と手順 | lenses/docs-procedure.md | `.md`・`.d2`・設定ファイルの変更がある |
 | テスト | lenses/tests.md | テストのファイルの変更がある |
+| 合否と承認 | lenses/gate-evidence.md | コードかエージェントが読む文書の変更が、確認の結果・承認・合否・完了・再開を扱う |
+| 文字列による判定 | lenses/text-evidence.md | コードの変更が、文字列の照合かテキストの解析を足すか変える |
 
 ## 並列と順次
 
