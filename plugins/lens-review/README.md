@@ -27,15 +27,25 @@ marketplace の名前は `reeschan-plugins` です (公式の `claude-plugins-of
 | `/lens-review:lens-review` | 既定ブランチとの merge-base と、作業ツリー (未コミット・未追跡を含む) |
 | `/lens-review:lens-review 123` | PR #123 |
 | `/lens-review:lens-review main..feature -- src/` | 2 点の間を `src/` に絞る |
-| `/lens-review:lens-review 123 --comment` | PR #123 をレビューし、インラインコメントで投稿する |
+| `/lens-review:lens-review 123 --comment` | PR #123 をレビューし、インラインコメントとまとめのコメントで投稿する。同じ PR に何度呼んでも重ねず、前の投稿を書き換える |
+| `/lens-review:lens-review 123 --comment --min-severity major` | 投稿を major 以上に絞る (端末への出力は全部) |
+| `/lens-review:lens-review 123 --comment --min-severity major --post-rule-violations` | 同じく major 以上。ただし `CLAUDE.md`・`AGENTS.md`・`--rules` の決まりに反する指摘は、軽くても投稿する |
 
 - `--rules <path>`: 追加の規約 (ファイルかフォルダ、複数可)。リポジトリの `CLAUDE.md`・`AGENTS.md` は自動で読みます。
 - `--spec <path>`: 仕様。仕様との食い違いも見ます。
+- `--min-severity <critical|major|minor>`: PR に投稿する指摘の重大度の下限。既定は `minor` (全部)。`--comment` のときだけ効き、端末への出力は変えません。
+- `--post-rule-violations`: 観点「規約と仕様」の指摘のうち、リポジトリの `CLAUDE.md`・`AGENTS.md` か `--rules` のファイルの決まりに反するものを、`--min-severity` より軽くても投稿します。仕様・ADR との食い違いは下限に従います。`--comment` のときだけ効きます。
 - `--inline`: サブエージェントを使わず、1 人で順に回します (費用を抑えたいとき)。
 - `--all`: 件数の上限 (10 件) を外します。
 - 依頼文に `Base:`・`Target:`・`Spec:`・`Rules:` の行を書いても同じ意味になります (引数を渡せない呼び出し元のため)。
 
 Agent ツールが使えないところ (サブエージェントの中など) では、自動で順次に切り替わります。
+
+## 0.3.0 の変更
+
+- `--min-severity`・`--post-rule-violations` を足した。投稿する指摘を重大度で絞れる。
+- `--comment` を「書き換え」にした。0.2.0 は、まとめのコメントがもうあると投稿をやめていた。0.3.0 は、同じ PR に何度呼ばれても、インラインコメントは (印が同じものを) 重ねず、まとめのコメント (1 行目が `## lens-review`) は 1 つのまま中身を新しくする。投稿者 (`gh api user`、取れなければ `github-actions[bot]`) が書いたものだけを書き換え対象にする。
+- bot から呼ばれる形に合わせた。`/lens-review:lens-review <PR 番号> --comment --min-severity <…>[ --post-rule-violations][ --rules <パス>]...[ --spec <パス>]` を受ける。bot の既定の下限は `major`、このプラグインの既定は `minor`。
 
 ## 観点
 
