@@ -18,7 +18,7 @@ claude plugin marketplace add reeschan/claude-plugins-official
 claude plugin install lens-review@reeschan-plugins --scope user
 ```
 
-marketplace の名前は `reeschan-plugins` です (公式の `claude-plugins-official` と区別するため)。載っているのは `lens-review` だけです。
+marketplace の名前は `reeschan-plugins` です (公式の `claude-plugins-official` と区別するため)。載っているのは `lens-review` と `public-guard` です。
 
 ## 使い方
 
