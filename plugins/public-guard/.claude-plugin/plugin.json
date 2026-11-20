@@ -1,0 +1,11 @@
+{
+  "name": "public-guard",
+  "description": "Stops commits, pushes, pull requests and other GitHub writes that would put words you keep private (your organization's repository names, customer names, internal names) into public repositories. The word lists stay on your machine.",
+  "version": "0.1.0",
+  "author": {
+    "name": "reeschan"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/reeschan/claude-plugins-official",
+  "homepage": "https://github.com/reeschan/claude-plugins-official/tree/reeschan/plugins/public-guard"
+}

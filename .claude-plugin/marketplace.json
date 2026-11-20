@@ -16,6 +16,17 @@
       "source": "./plugins/lens-review",
       "category": "productivity",
       "homepage": "https://github.com/reeschan/claude-plugins-official/tree/reeschan/plugins/lens-review"
+    },
+    {
+      "name": "public-guard",
+      "description": "Stops commits, pushes, pull requests and other GitHub writes that would put words you keep private (your organization's repository names, customer names, internal names) into public repositories. The word lists stay on your machine.",
+      "version": "0.1.0",
+      "author": {
+        "name": "reeschan"
+      },
+      "source": "./plugins/public-guard",
+      "category": "security",
+      "homepage": "https://github.com/reeschan/claude-plugins-official/tree/reeschan/plugins/public-guard"
     }
   ]
 }
